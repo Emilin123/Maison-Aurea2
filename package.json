@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node notify-probe.js && node app_fixed.js",
+    "start": "node notify-probe.js && node app_boot.js",
     "selftest": "node selftest.js"
   },
   "dependencies": {
