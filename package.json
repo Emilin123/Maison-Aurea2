@@ -1,1 +1,1 @@
-{"name":"maison-aurea-deploy","private":true,"type":"module","scripts":{"start":"node bootstrap.js"},"dependencies":{"pg":"^8.16.3"}}
+{"name":"maison-aurea","private":true,"type":"module","scripts":{"start":"node server.js"},"dependencies":{"pg":"^8.16.3"}}
