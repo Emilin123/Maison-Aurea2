@@ -102,6 +102,7 @@ async function cleanup() {
     const user = { id: Number(tgId), first_name: 'Maison Aurea SelfTest', username: `selftest_${tgId}` };
     const hdr = { 'x-telegram-init-data': initData(user) };
     r = await http('/api/me', { headers: hdr });
+    if (r.status !== 200) console.log('SELFTEST AUTH RESPONSE:', r.status, JSON.stringify(r.body));
     assert(r.status === 200 && r.body?.wallet?.promotional_diamonds === 5 && r.body?.user?.starter_mining_used === false, 'real initData HMAC authentication creates the starter state correctly');
 
     r = await http('/api/mining/start', { method:'POST', headers:{...hdr,'content-type':'application/json'}, body:JSON.stringify({package_id:'starter'}) });
