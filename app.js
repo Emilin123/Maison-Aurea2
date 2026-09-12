@@ -39,6 +39,7 @@ const STARTER={id:'starter',name:'Bono inicial',price_cup:0,diamonds:5,duration_
 
 const SCHEMA=`
 CREATE TABLE IF NOT EXISTS users(id bigserial primary key,telegram_user_id text unique not null,username text,first_name text,referral_code text unique not null,referred_by text,welcome_bonus_granted boolean not null default false,starter_bonus_granted boolean not null default false,suspended boolean not null default false,created_at timestamptz not null default now());
+ALTER TABLE users ADD COLUMN IF NOT EXISTS welcome_bonus_granted boolean not null default false;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS starter_bonus_granted boolean not null default false;
 CREATE TABLE IF NOT EXISTS wallets(user_id bigint primary key references users(id),purchased_diamonds bigint not null default 0,promotional_diamonds bigint not null default 0,locked_diamonds bigint not null default 0,pending_cup bigint not null default 0,available_cup bigint not null default 0,paid_cup bigint not null default 0);
 CREATE TABLE IF NOT EXISTS orders(id bigserial primary key,order_no text unique not null,user_id bigint not null references users(id),kind text not null,catalog_id text not null,amount_cup bigint not null default 0,diamonds bigint not null default 0,operation_no text,proof_url text,status text not null default 'pending_payment',snapshot jsonb,created_at timestamptz not null default now());
