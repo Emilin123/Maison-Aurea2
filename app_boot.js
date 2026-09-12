@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 const source=await fs.readFile(new URL('./app_fixed.js',import.meta.url),'utf8');
-// Force Telegram Mini App clients to fetch the latest frontend after each fix.
-const patched=source.replaceAll('v=20260912.7','v=20260912.8');
+const finalize="async function finalizeMining(userId){const r=await db(\"select * from mining_sessions where user_id=$1 and status='running' and ends_at<=now() order by ends_at desc limit 1\",[userId]);if(!r.rowCount)return null;const s=r.rows[0];const c=await pool.connect();try{await c.query('begin');const lock=await c.query(\"select * from mining_sessions where id=$1 and status='running' for update\",[s.id]);if(!lock.rowCount){await c.query('rollback');return null}await c.query(\"update mining_sessions set status='completed' where id=$1\",[s.id]);let reward=0;if(String(s.package_id)==='starter'){reward=25;await c.query('update wallets set available_cup=available_cup+$1 where user_id=$2',[reward,userId])}await c.query('commit');await audit(String(userId),'mining_completed','mining',String(s.id),{reward_cup:reward});return {...s,status:'completed',reward_cup:reward}}catch(e){try{await c.query('rollback')}catch{}throw e}finally{c.release()}}\n";
+const patched=source.replace('async function main(){',finalize+'async function main(){');
 const runtime=new URL('./.maison-aurea-runtime.mjs',import.meta.url);
 await fs.writeFile(runtime,patched+'\n}\nmain();\n','utf8');
 await import(runtime.href);
