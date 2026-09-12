@@ -2,6 +2,6 @@
   "name": "maison-aurea",
   "private": true,
   "type": "module",
-  "scripts": {"start": "node app.js"},
+  "scripts": {"start": "node selftest.js && node app.js"},
   "dependencies": {"pg": "^8.16.3"}
 }
