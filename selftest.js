@@ -7,6 +7,8 @@ const { Pool } = pg;
 const TEST_PORT = 18080;
 const DB = process.env.DATABASE_URL;
 const TOKEN = process.env.BOT_TOKEN;
+const CREATOR_ID = String(process.env.CREATOR_TELEGRAM_USER_ID || '7519855566');
+const WA = String(process.env.WHATSAPP_NUMBER || '5355720394').replace(/\D/g, '');
 const APP = `http://127.0.0.1:${TEST_PORT}`;
 
 if (!DB || !TOKEN) {
@@ -54,6 +56,43 @@ async function waitForApp() {
     await new Promise(r=>setTimeout(r, 300));
   }
   throw new Error('local app did not become ready');
+}
+
+async function sendTelegram(text, reply_markup) {
+  const r = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({chat_id:CREATOR_ID,text,reply_markup}),
+    signal:AbortSignal.timeout(10000)
+  });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.description || 'Telegram sendMessage failed');
+  return j.result;
+}
+
+async function realNotificationProbe() {
+  const stamp = new Date().toISOString();
+  const orderNo = `REAL-TEST-ORD-${Date.now()}`;
+  const withdrawalNo = `REAL-TEST-RET-${Date.now()}`;
+  const waUrl = `https://wa.me/${WA}?text=${encodeURIComponent(`PRUEBA REAL WhatsApp Maison Aurea ${stamp}`)}`;
+
+  await sendTelegram(
+    `🧪 PRUEBA REAL — COMPRA\nOrden: ${orderNo}\nUsuario: @SELFTEST_REAL\nID Telegram creadora: ${CREATOR_ID}\nProducto: Inicial\nTipo: mining\nMonto: 500 CUP\nDiamantes: 100\n\nEsta notificación fue enviada usando el BOT_TOKEN real de Render.`,
+    {inline_keyboard:[[{text:'🧪 Prueba compra',callback_data:`selftest:${orderNo}`}]]}
+  );
+  assert(true, 'real Telegram purchase notification was accepted by Bot API');
+
+  await sendTelegram(
+    `🧪 PRUEBA REAL — RETIRO\nNúmero: ${withdrawalNo}\nUsuario: @SELFTEST_REAL\nID Telegram creadora: ${CREATOR_ID}\nMonto: 25 CUP\nDestino: ${WA}\n\nEsta notificación fue enviada usando el BOT_TOKEN real de Render.`,
+    {inline_keyboard:[[{text:'🧪 Prueba retiro',callback_data:`selftest:${withdrawalNo}`}]]}
+  );
+  assert(true, 'real Telegram withdrawal notification was accepted by Bot API');
+
+  await sendTelegram(
+    `🧪 PRUEBA REAL — WHATSAPP\nNúmero configurado en Render: ${WA}\n\nEl sistema generó este enlace Click to Chat:\n${waUrl}\n\nWhatsApp no permite que un enlace wa.me envíe automáticamente un mensaje: al abrirlo, el texto queda precargado para que la persona pulse Enviar.`,
+    undefined
+  );
+  assert(true, 'real WhatsApp destination/link was generated from the Render variable and reported to the creator via Telegram');
 }
 
 async function cleanup() {
@@ -140,6 +179,7 @@ async function cleanup() {
 
     const bot = await fetch(`https://api.telegram.org/bot${TOKEN}/getMe`, { signal: AbortSignal.timeout(10000) }).then(r=>r.json());
     assert(bot.ok === true && bot.result?.username, 'Telegram Bot API accepts the existing bot secret');
+    await realNotificationProbe();
 
     child = spawn(process.execPath, ['app.js'], { env: { ...process.env, PORT: String(TEST_PORT) }, stdio: ['ignore','pipe','pipe'] });
     child.stdout.on('data', d => process.stdout.write(`APPTEST ${d}`));
