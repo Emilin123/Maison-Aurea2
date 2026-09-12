@@ -19,7 +19,7 @@
 <button data-go="members">👑 Membresías</button><button data-go="accelerators">⚡ Aceleradores</button>
 <button data-go="referrals">🤝 Invitar amigos</button><button data-go="history">📜 Historial</button>
 <button data-go="support">🆘 Soporte</button><button data-go="rules">📋 Reglas</button>
-<button data-go="settings">⚙️ Ajustes</button><button id="adminBtn" data-go="admin" hidden>🔐 Creadora</button>
+<button data-go="settings">⚙️ Ajustes</button>
 </div></section>
 <section id="mining" class="screen"><button data-go="home">← Inicio</button><h2>⛏️ Minería</h2><div id="mineList"></div><div id="mineState" class="card">Sin sesión activa.</div></section>
 <section id="cards" class="screen"><button data-go="home">← Inicio</button><h2>🃏 Cartas ganadoras</h2><div class="card">08:00–12:00 y 14:00–22:00, hora de La Habana.<br>Entrada: 100 💎 · máximo 500 por sorteo.<br>Solo ganan quienes eligieron la carta sorteada. Puede haber cero ganadores.</div><div id="cardList" class="grid"></div></section>
@@ -37,15 +37,15 @@
 <script>
 (function(){
  const tg=window.Telegram&&window.Telegram.WebApp; if(tg){tg.ready();tg.expand();}
- const init=tg&&tg.initData||''; let me=null,cat=null;
+ const init=tg&&tg.initData||''; const initialScreen=new URLSearchParams(location.search).get('screen'); let me=null,cat=null;
  const $=id=>document.getElementById(id); const esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
  function msg(text,error){$('message').innerHTML=error?'<span class="error">'+esc(text)+'</span>':esc(text);}
  async function api(url,options){options=options||{};options.headers=Object.assign({'content-type':'application/json','x-telegram-init-data':init},options.headers||{});for(let attempt=0;attempt<2;attempt++){const r=await fetch(url,options);if(r.status===502&&attempt===0){msg('Servidor despertando…');await new Promise(resolve=>setTimeout(resolve,1600));continue;}let j={};try{j=await r.json();}catch(e){}if(!r.ok)throw Error(j.error||('Error '+r.status));return j;}throw Error('El servidor no respondió. Intenta actualizar.');}
  function go(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('on'));const el=$(id);if(el)el.classList.add('on');if(id==='mining')renderMining();if(id==='cards')renderCards();if(id==='diamonds')renderBuy();if(id==='members')renderMembers();if(id==='accelerators')renderAcc();if(id==='wallet')renderWallet();if(id==='referrals')renderRefs();if(id==='history')renderHistory();if(id==='admin')renderAdmin();window.scrollTo(0,0);}
  document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){e.preventDefault();go(b.dataset.go);}});
  function card(title,text,label,fn){const d=document.createElement('div');d.className='card';d.innerHTML='<b>'+esc(title)+'</b><p class="muted">'+esc(text)+'</p>';const b=document.createElement('button');b.className='primary';b.textContent=label;b.addEventListener('click',fn);d.appendChild(b);return d;}
- function top(){const w=me.wallet;$('top').innerHTML='<b>Hola, '+esc(me.user.first_name||'jugador')+'</b><div class="row"><span>💎 Diamantes</span><b>'+w.purchased_diamonds+'</b></div><div class="row"><span>🎁 Promocionales</span><b>'+w.promotional_diamonds+'</b></div><div class="row"><span>💰 CUP disponible</span><b>'+w.available_cup+'</b></div>';if(me.user.is_creator)$('adminBtn').hidden=false;}
- async function load(){try{cat=await api('/api/catalog');me=await api('/api/me');top();$('telegramStatus').textContent='conectado';msg('Maison Aurea lista.');}catch(e){$('telegramStatus').textContent='sin sesión';msg(e.message,true);}}
+ function top(){const w=me.wallet;$('top').innerHTML='<b>Hola, '+esc(me.user.first_name||'jugador')+'</b><div class="row"><span>💎 Diamantes</span><b>'+w.purchased_diamonds+'</b></div><div class="row"><span>🎁 Promocionales</span><b>'+w.promotional_diamonds+'</b></div><div class="row"><span>💰 CUP disponible</span><b>'+w.available_cup+'</b></div>';}
+ async function load(){try{cat=await api('/api/catalog');me=await api('/api/me');top();$('telegramStatus').textContent='conectado';msg('Maison Aurea lista.');if(initialScreen&&$(initialScreen)&& (initialScreen!=='admin'||me.user.is_creator))go(initialScreen);}catch(e){$('telegramStatus').textContent='sin sesión';msg(e.message,true);}}
  function renderMining(){const x=$('mineList');x.innerHTML='';cat.mining_packages.forEach(p=>x.appendChild(card('⛏️ '+p.name,p.price_cup+' CUP · '+p.diamonds+' 💎 · '+p.duration_days+' días','Iniciar minería',async()=>{try{const m=await api('/api/mining/start',{method:'POST',body:JSON.stringify({package_id:p.id})});$('mineState').innerHTML='<div class="mine">⛏️🧙‍♂️💎</div><b>Minería activa</b><p>Finaliza: '+new Date(m.ends_at).toLocaleString()+'</p>';msg('Minería iniciada.');}catch(e){msg(e.message,true);}})));}
  function renderCards(){const x=$('cardList');x.innerHTML='';['AUREA','ONYX','RUBI','ZAFIRO','ESMERALDA','PERLA'].forEach(c=>x.appendChild(card('🂠 '+c,'Participación: 100 diamantes','Elegir',async()=>{try{await api('/api/cards/enter',{method:'POST',body:JSON.stringify({card:c})});msg('Participación confirmada: '+c);}catch(e){msg(e.message,true);}})));}
  function renderBuy(){const x=$('buyList');x.innerHTML='';cat.mining_packages.forEach(p=>x.appendChild(card('💎 '+p.diamonds+' diamantes',p.price_cup+' CUP · '+p.duration_days+' días','Crear orden',()=>createOrder('mining',p.id))));}
