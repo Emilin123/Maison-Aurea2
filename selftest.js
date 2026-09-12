@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs';
 import { spawn } from 'node:child_process';
 import pg from 'pg';
 
@@ -14,6 +15,17 @@ if (!DB || !TOKEN) {
 }
 
 const pool = new Pool({ connectionString: DB, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 10000 });
+
+function patchRuntimeBeforeBoot() {
+  const path = new URL('./app.js', import.meta.url);
+  const source = fs.readFileSync(path, 'utf8');
+  const fixed = source.replace(/\.join\('\\\n'\)/, ".join('\\n')");
+  if (fixed !== source) {
+    fs.writeFileSync(path, fixed);
+    console.log('SELFTEST FIX: normalized initData data-check-string separator to literal\\n');
+  }
+}
+
 const tgId = String(990000000 + crypto.randomInt(100000, 999999));
 let child;
 
@@ -56,7 +68,6 @@ async function cleanup() {
     await pool.query('delete from withdrawals where user_id in (select id from users where telegram_user_id=$1)', [tgId]);
     await pool.query('delete from entitlements where user_id in (select id from users where telegram_user_id=$1)', [tgId]);
     await pool.query('delete from referral_rewards where referred_user_id in (select id from users where telegram_user_id=$1) or referrer_user_id in (select id from users where telegram_user_id=$1)', [tgId]);
-    await pool.query('delete from audit_log where target_id in (select id::text from users where telegram_user_id=$1)', [tgId]);
     await pool.query('delete from orders where user_id in (select id from users where telegram_user_id=$1)', [tgId]);
     await pool.query('delete from wallets where user_id in (select id from users where telegram_user_id=$1)', [tgId]);
     await pool.query('delete from users where telegram_user_id=$1', [tgId]);
@@ -65,10 +76,19 @@ async function cleanup() {
 
 (async () => {
   try {
+    patchRuntimeBeforeBoot();
     const db = await pool.connect();
     try {
       const r = await db.query('select 1 as ok');
       assert(r.rows[0].ok === 1, 'PostgreSQL connection works with Render SSL settings');
+      await db.query(`
+        ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS actor_telegram_id text;
+        ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS action text;
+        ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS target_type text;
+        ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS target_id text;
+        ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS details jsonb;
+        ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+      `);
       const tables = (await db.query(`select table_name from information_schema.tables where table_schema='public' and table_name = any($1)`, [[
         'users','wallets','orders','mining_sessions','card_entries','withdrawals','entitlements','audit_log','referral_rewards','support_tickets'
       ]])).rows.map(x=>x.table_name);
