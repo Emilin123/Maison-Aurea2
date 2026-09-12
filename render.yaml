@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: maison-aurea
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: PUBLIC_APP_URL
+        sync: false
+      - key: CREATOR_TELEGRAM_USER_ID
+        sync: false
+      - key: DATABASE_URL
+        sync: false
