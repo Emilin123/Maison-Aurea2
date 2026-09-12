@@ -5,7 +5,7 @@ const inlineMenu=`function menu(){const rows=[['⛏️ Minar','mining'],['🃏 C
 let patched=source.replace(/function menu\(\)\{.*?async function handleUpdate/,inlineMenu+'async function handleUpdate');
 patched=patched.replace('async function main(){',finalize+'async function main(){');
 const marker="const html=await fs.readFile(path.join(process.cwd(),'public','index.html'),'utf8');res.statusCode=200;res.setHeader('content-type','text/html; charset=utf-8');res.setHeader('cache-control','no-store, max-age=0');return res.end(html)";
-const served="const html=await fs.readFile(path.join(process.cwd(),'public','index.html'),'utf8');res.statusCode=200;res.setHeader('content-type','text/html; charset=utf-8');res.setHeader('cache-control','no-store, max-age=0');return res.end(html.replace('</body>','<script src=\"/mining-visual.js?v=20260912.11\"></script></body>'))";
+const served="const html=await fs.readFile(path.join(process.cwd(),'public','index.html'),'utf8');res.statusCode=200;res.setHeader('content-type','text/html; charset=utf-8');res.setHeader('cache-control','no-store, max-age=0');const visual='<script src=\"/mining-visual.js?v=20260912.12\" defer></script>';return res.end(html.replace(/<\\/body>/i,visual+'<\\/body>'))";
 patched=patched.replace(marker,served);
 const runtime=new URL('./.maison-aurea-runtime.mjs',import.meta.url);
 await fs.writeFile(runtime,patched+'\n}\nmain();\n','utf8');
