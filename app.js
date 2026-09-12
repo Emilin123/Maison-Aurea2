@@ -11,9 +11,15 @@ const CREATOR_ID = String(process.env.CREATOR_TELEGRAM_USER_ID || '7519855566');
 const WA = String(process.env.WHATSAPP_NUMBER || '5355720394').replace(/\D/g, '');
 const EMAIL = process.env.SUPPORT_EMAIL || 'nunezyenis05@gmail.com';
 const PAYMENT_INFO = process.env.PAYMENT_INFO || 'Solicita las instrucciones de pago por WhatsApp.';
+const PAYMENT_CARD_NUMBER = String(process.env.PAYMENT_CARD_NUMBER || '').trim();
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const NOTIFY_TEST_SECRET = process.env.NOTIFY_TEST_SECRET || '';
 const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }) : null;
+
+// Keep the payment destination server-side. Never hard-code it into the repository.
+const paymentInstructions = () => PAYMENT_CARD_NUMBER
+  ? `💳 Tarjeta para el pago: ${PAYMENT_CARD_NUMBER}\n${PAYMENT_INFO}`
+  : PAYMENT_INFO;
 
 const CATALOG = {
   mining_packages: [
@@ -197,61 +203,74 @@ async function approveOrder(orderNo,actor){
     if(o.kind==='mining') await client.query('update wallets set purchased_diamonds=purchased_diamonds+$1 where user_id=$2',[o.diamonds,o.user_id]);
     else {
       const cost=o.diamonds, w=(await client.query('select * from wallets where user_id=$1 for update',[o.user_id])).rows[0];
-      const spendable=Number(w.purchased_diamonds)+Number(w.promotional_diamonds)-Number(w.locked_diamonds);
-      if(spendable<cost){await client.query('rollback');await db('update orders set status=$1 where order_no=$2',['rejected',orderNo]);await audit(actor,'order_rejected_insufficient_diamonds','order',orderNo,{cost});return false;}
-      let left=cost, promo=Math.min(Number(w.promotional_diamonds),left); left-=promo;
-      await client.query('update wallets set promotional_diamonds=promotional_diamonds-$1,purchased_diamonds=purchased_diamonds-$2 where user_id=$3',[promo,left,o.user_id]);
-      const days=p.duration_days||7; await client.query(`insert into entitlements(user_id,kind,catalog_id,ends_at) values($1,$2,$3,now()+($4||' days')::interval)`,[o.user_id,o.kind,o.catalog_id,String(days)]);
+      if(!w || Number(w.purchased_diamonds)+Number(w.promotional_diamonds)-Number(w.locked_diamonds)<cost){await client.query('rollback');return false;}
+      await client.query('update wallets set locked_diamonds=locked_diamonds+$1 where user_id=$2',[cost,o.user_id]);
+      const days=p.duration_days || 0; await client.query(`insert into entitlements(user_id,kind,catalog_id,ends_at) values($1,$2,$3,now()+($4||' days')::interval)`,[o.user_id,o.kind,o.catalog_id,days]);
     }
-    await client.query("update orders set status='approved' where id=$1",[o.id]); await client.query('commit'); await audit(actor,'order_approved','order',orderNo,{kind:o.kind}); await rewardReferral(o.user_id); return true;
-  }catch(e){try{await client.query('rollback')}catch{};throw e}finally{client.release();}
+    await client.query('update orders set status=\'approved\' where id=$1',[o.id]);
+    await client.query('commit'); await audit(actor,'approve_order','order',o.order_no,{kind:o.kind}); if(o.kind==='mining') await rewardReferral(o.user_id); return true;
+  } catch(e){try{await client.query('rollback')}catch{}; throw e} finally{client.release()}
 }
-async function rejectOrder(orderNo,actor){ const r=await db(`update orders set status='rejected' where order_no=$1 and status in ('pending_payment','under_review') returning *`,[orderNo]); if(r.rowCount) await audit(actor,'order_rejected','order',orderNo); return !!r.rowCount; }
-async function markWithdrawalPaid(requestNo,actor){
-  const client=await pool.connect(); try{ await client.query('begin'); const r=await client.query("select * from withdrawals where request_no=$1 for update",[requestNo]);
-    if(!r.rowCount || r.rows[0].status!=='requested'){await client.query('rollback');return false;} const w=r.rows[0];
-    await client.query("update withdrawals set status='paid' where id=$1",[w.id]); await client.query("update wallets set pending_cup=pending_cup-$1,paid_cup=paid_cup+$1 where user_id=$2",[w.amount_cup,w.user_id]); await client.query('commit'); await audit(actor,'withdrawal_paid','withdrawal',requestNo,{amount_cup:w.amount_cup}); return true;
-  }catch(e){try{await client.query('rollback')}catch{};throw e}finally{client.release();}
+
+async function rejectOrder(orderNo,actor){
+  const r=await db(`update orders set status='rejected' where order_no=$1 and status in ('pending_payment','under_review') returning *`,[orderNo]);
+  if(r.rowCount){ await audit(actor,'reject_order','order',orderNo,{}); return true; } return false;
 }
+
 async function finalizeMining(userId){
-  const client=await pool.connect(); try{await client.query('begin'); const r=await client.query("select * from mining_sessions where user_id=$1 and status='running' and ends_at<=now() order by id desc limit 1 for update",[userId]);
-    if(!r.rowCount){await client.query('rollback');return;} const m=r.rows[0],starter=m.package_id==='starter'; await client.query("update mining_sessions set status='completed' where id=$1",[m.id]); if(starter) await client.query('update wallets set available_cup=available_cup+25 where user_id=$1',[userId]); await client.query('commit'); await audit(null,'mining_completed','mining',String(m.id),{starter});
-  }catch(e){try{await client.query('rollback')}catch{};throw e}finally{client.release();}
+  const r=await db(`update mining_sessions set status='completed' where user_id=$1 and status='running' and ends_at<=now() returning *`,[userId]);
+  if(!r.rowCount) return null;
+  const s=r.rows[0];
+  if(s.package_id==='starter') await db('update wallets set available_cup=available_cup+25 where user_id=$1',[userId]);
+  return s;
 }
-async function bot(update){
-  if(update?.callback_query){ const q=update.callback_query; if(String(q.from?.id)!==CREATOR_ID) return telegram('answerCallbackQuery',{callback_query_id:q.id,text:'No autorizado',show_alert:true}); const [action,no]=String(q.data||'').split(':'); let ok=false;
-    if(action==='approve')ok=await approveOrder(no,q.from.id); else if(action==='reject')ok=await rejectOrder(no,q.from.id); else if(action==='withdraw_paid')ok=await markWithdrawalPaid(no,q.from.id);
-    await telegram('answerCallbackQuery',{callback_query_id:q.id,text:ok?'Operación completada':'Ya procesada o inválida'}); try{await telegram('editMessageReplyMarkup',{chat_id:q.message.chat.id,message_id:q.message.message_id,reply_markup:{inline_keyboard:[]}})}catch{} return; }
-  const m=update?.message; if(!m?.chat?.id)return; const text=String(m.text||''); if(text.startsWith('/start')){await ensureUser(m.from,text.trim().split(/\s+/)[1]||'');await sendFreshMenu(m.chat.id);return;} await sendFreshMenu(m.chat.id);
-}
-async function api(req,res){
-  const url=new URL(req.url,'http://localhost'), p=url.pathname;
-  if(req.method==='GET'&&p==='/health')return send(res,200,{ok:true,service:'maison-aurea',time:new Date().toISOString()});
-  if(req.method==='GET'&&p==='/api/catalog')return send(res,200,{...CATALOG,starter:STARTER});
-  if(req.method==='GET'&&p==='/app'){try{return send(res,200,await fs.readFile(new URL('./public/index.html',import.meta.url),'utf8'),'text/html');}catch{return send(res,500,{error:'app_unavailable'});}}
-  if(req.method==='POST'&&p==='/webhook'){if(WEBHOOK_SECRET&&req.headers['x-telegram-bot-api-secret-token']!==WEBHOOK_SECRET)return send(res,403,{error:'forbidden'});try{await bot(await readBody(req));return send(res,200,{ok:true});}catch(e){console.error('webhook',e);return send(res,200,{ok:true});}}
-  if(req.method==='GET'&&p==='/__notify-test'){
-    if(!NOTIFY_TEST_SECRET || req.headers['x-maison-test-secret']!==NOTIFY_TEST_SECRET)return send(res,404,{error:'not_found'});
-    const stamp=new Date().toISOString(), fakeUser={telegram_user_id:CREATOR_ID,username:'TEST_REAL',first_name:'Prueba'};
-    const fakeOrder={order_no:`TEST-ORD-${Date.now()}`,kind:'mining',catalog_id:'initial',amount_cup:500,diamonds:100};
-    const fakeWithdrawal={request_no:`TEST-RET-${Date.now()}`,amount_cup:25,destination:WA};
-    const result={telegram_target:CREATOR_ID,whatsapp_number_digits:WA,whatsapp_url:wa(`PRUEBA WhatsApp Maison Aurea ${stamp}`),order_message_sent:false,withdrawal_message_sent:false};
-    try{await telegram('sendMessage',{chat_id:CREATOR_ID,text:`🧪 PRUEBA REAL — COMPRA\nOrden: ${fakeOrder.order_no}\nUsuario: @TEST_REAL\nID Telegram: ${CREATOR_ID}\nProducto: Inicial\nTipo: mining\nMonto: 500 CUP\nDiamantes: 100\n\nSi recibes este mensaje, la ruta Telegram de notificación de compras funciona.` ,reply_markup:{inline_keyboard:[[{text:'🧪 Prueba aprobable',callback_data:`reject:${fakeOrder.order_no}`}]]}});result.order_message_sent=true;}catch(e){result.order_error=e.message;}
-    try{await telegram('sendMessage',{chat_id:CREATOR_ID,text:`🧪 PRUEBA REAL — RETIRO\nNúmero: ${fakeWithdrawal.request_no}\nUsuario: @TEST_REAL\nID Telegram: ${CREATOR_ID}\nMonto: 25 CUP\nDestino: ${WA}\n\nSi recibes este mensaje, la ruta Telegram de notificación de retiros funciona.` ,reply_markup:{inline_keyboard:[[{text:'🧪 Prueba pagado',callback_data:`withdraw_paid:${fakeWithdrawal.request_no}`}]]}});result.withdrawal_message_sent=true;}catch(e){result.withdrawal_error=e.message;}
-    try{await telegram('sendMessage',{chat_id:CREATOR_ID,text:`🧪 PRUEBA WHATSAPP\nNúmero configurado: ${WA}\nEl botón/enlace de WhatsApp se genera como Click to Chat. Debe abrir una conversación con el número configurado con el texto precargado.\n${result.whatsapp_url}`});}catch(e){result.whatsapp_telegram_error=e.message;}
-    return send(res,200,result);
+
+async function handleUpdate(update){
+  if(update?.callback_query){
+    const cq=update.callback_query, actor=String(cq.from?.id||'');
+    if(actor!==CREATOR_ID) { try{await telegram('answerCallbackQuery',{callback_query_id:cq.id,text:'No autorizado'});}catch{}; return; }
+    const [action,id]=String(cq.data||'').split(':');
+    if(action==='approve') await approveOrder(id,actor);
+    else if(action==='reject') await rejectOrder(id,actor);
+    else if(action==='withdraw_paid') await db(`update withdrawals set status='paid' where request_no=$1 and status='requested'`,[id]);
+    try{await telegram('answerCallbackQuery',{callback_query_id:cq.id,text:'Procesado'});}catch{}
+    return;
   }
-  const u=await auth(req); if(!u)return send(res,401,{error:'Abre Maison Aurea desde Telegram.'});
-  if(req.method==='GET'&&p==='/api/me'){await finalizeMining(u.id);const user=(await db('select * from users where id=$1',[u.id])).rows[0];const wallet=(await db('select * from wallets where user_id=$1',[u.id])).rows[0];const mining=(await db("select id,package_id,started_at,ends_at,status from mining_sessions where user_id=$1 and status='running' order by id desc limit 1",[u.id])).rows[0]||null;const lastCompleted=(await db("select id,package_id,started_at,ends_at,status from mining_sessions where user_id=$1 and status='completed' order by id desc limit 1",[u.id])).rows[0]||null;return send(res,200,{user:{telegram_user_id:user.telegram_user_id,username:user.username,first_name:user.first_name,referral_code:user.referral_code,is_creator:String(user.telegram_user_id)===CREATOR_ID,starter_mining_used:user.starter_mining_used},wallet,mining,last_completed:lastCompleted});}
-  if(p.startsWith('/api/admin/')){if(String(u.telegram_user_id)!==CREATOR_ID)return send(res,403,{error:'No autorizado'});if(req.method==='GET'&&p==='/api/admin/orders')return send(res,200,(await db("select order_no,kind,catalog_id,amount_cup,diamonds,status,created_at from orders where status in ('pending_payment','under_review') order by id desc")).rows);if(req.method==='GET'&&p==='/api/admin/withdrawals')return send(res,200,(await db("select w.request_no,w.amount_cup,w.destination,w.status,w.created_at,u.telegram_user_id,u.username from withdrawals w join users u on u.id=w.user_id where w.status='requested' order by w.id desc")).rows);if(req.method==='GET'&&p==='/api/admin/audit')return send(res,200,(await db("select actor_telegram_id,action,target_type,target_id,details,created_at from audit_log order by id desc limit 100")).rows);if(req.method==='GET'&&p==='/api/admin/users')return send(res,200,(await db('select count(*)::int users,count(*) filter(where created_at::date=current_date)::int today from users')).rows[0]);if(req.method==='POST'&&p.startsWith('/api/admin/orders/')){const no=decodeURIComponent(p.split('/').pop()),b=await readBody(req);if(b.action==='approve')return send(res,200,{ok:await approveOrder(no,u.telegram_user_id)});if(b.action==='reject')return send(res,200,{ok:await rejectOrder(no,u.telegram_user_id)});}if(req.method==='POST'&&p.startsWith('/api/admin/withdrawals/')){const no=decodeURIComponent(p.split('/').pop()),b=await readBody(req);if(b.action==='paid')return send(res,200,{ok:await markWithdrawalPaid(no,u.telegram_user_id)});}return send(res,404,{error:'not_found'});}
-  if(req.method==='POST'&&p==='/api/mining/start'){const b=await readBody(req),key=String(b.package_id||''),client=await pool.connect();try{await client.query('begin');const us=(await client.query('select * from users where id=$1 for update',[u.id])).rows[0];if(key==='starter'){if(us.starter_mining_used){await client.query('rollback');return send(res,409,{error:'El bono inicial ya fue utilizado.'});}}else if(!product('mining',key)){await client.query('rollback');return send(res,400,{error:'Paquete inválido.'});}const active=await client.query("select id from mining_sessions where user_id=$1 and status='running' for update",[u.id]);if(active.rowCount){await client.query('rollback');return send(res,409,{error:'Ya tienes una minería activa.'});}const minutes=key==='starter'?30:(product('mining',key).duration_days*24*60);const ends=new Date(Date.now()+minutes*60000);await client.query("insert into mining_sessions(user_id,package_id,started_at,ends_at,status,snapshot) values($1,$2,now(),$3,'running',$4)",[u.id,key,ends,JSON.stringify(key==='starter'?STARTER:product('mining',key))]);if(key==='starter')await client.query('update users set starter_mining_used=true where id=$1',[u.id]);const r=await client.query("select id,package_id,started_at,ends_at,status from mining_sessions where user_id=$1 and status='running' order by id desc limit 1",[u.id]);await client.query('commit');return send(res,200,r.rows[0]);}catch(e){try{await client.query('rollback')}catch{}if(e.code==='23505')return send(res,409,{error:'Ya tienes una minería activa.'});throw e}finally{client.release();}}
-  if(req.method==='POST'&&p==='/api/orders'){const b=await readBody(req),kind=String(b.kind||''),cid=String(b.catalog_id||''),prod=product(kind,cid);if(!prod)return send(res,400,{error:'Producto inválido.'});const amount=kind==='mining'?prod.price_cup:0,diamonds=kind==='mining'?prod.diamonds:prod.price_diamonds,orderNo=makeId('ORD'),snapshot={...prod,kind,catalog_id:cid};const o=(await db(`insert into orders(order_no,user_id,kind,catalog_id,amount_cup,diamonds,status,snapshot) values($1,$2,$3,$4,$5,$6,'pending_payment',$7) returning *`,[orderNo,u.id,kind,cid,amount,diamonds,JSON.stringify(snapshot)])).rows[0];const text=`Maison Aurea\nNueva compra\nProducto: ${prod.name}\nMonto: ${amount} CUP\nDiamantes: ${diamonds}\nNúmero de orden: ${orderNo}\n\n${PAYMENT_INFO}\n\nEnvía captura, número telefónico y número de operación.\nEspera estimada: 30 minutos a 1 hora.`;await notifyOrder(o,u);return send(res,201,{order_no:orderNo,status:o.status,whatsapp_url:wa(text),product:prod});}
-  if(req.method==='GET'&&p==='/api/referrals'){const inv=(await db('select telegram_user_id,username,created_at from users where referred_by=$1 order by id desc',[u.referral_code])).rows,reward=(await db('select coalesce(sum(reward_diamonds),0)::int total from referral_rewards where referrer_user_id=$1',[u.id])).rows[0];return send(res,200,{code:u.referral_code,link:`https://t.me/MaisonAureaGameBot?start=${encodeURIComponent(u.referral_code)}`,invited:inv,rewarded_diamonds:reward.total,share_text:'Únete a Maison Aurea 💎'});}
-  if(req.method==='GET'&&p==='/api/support')return send(res,200,{phone:WA,email:EMAIL});
-  if(req.method==='POST'&&p==='/api/support'){const b=await readBody(req),message=String(b.message||'').trim();if(!message)return send(res,400,{error:'Escribe el problema.'});const text=`Soporte Maison Aurea\nUsuario: @${u.username||'sin_usuario'}\nID de Telegram: ${u.telegram_user_id}\nDescripción: ${message}\nOrden/retiro: ${b.reference||'No indicado'}\n\nNo envíes PIN, contraseña, CVV ni códigos SMS.\nEspera estimada: 30 minutos a 1 hora.`;const t=(await db("insert into support_tickets(user_id,message,channel) values($1,$2,'whatsapp') returning id",[u.id])).rows[0];return send(res,201,{ticket_id:t.id,whatsapp_url:wa(text),email_url:`mailto:${EMAIL}?subject=${encodeURIComponent('Soporte Maison Aurea')}&body=${encodeURIComponent(text)}`});}
-  if(req.method==='POST'&&p==='/api/withdrawals'){const b=await readBody(req),amount=Number(b.amount_cup),destination=String(b.destination||'').trim();if(!Number.isInteger(amount)||amount<=0)return send(res,400,{error:'El monto debe ser un entero positivo.'});if(!destination)return send(res,400,{error:'Indica el destino del pago.'});const client=await pool.connect();try{await client.query('begin');const w=(await client.query('select * from wallets where user_id=$1 for update',[u.id])).rows[0];if(Number(w.available_cup)<amount){await client.query('rollback');return send(res,400,{error:'Saldo disponible insuficiente.'});}const no=makeId('RET'),r=(await client.query("insert into withdrawals(request_no,user_id,amount_cup,destination,status) values($1,$2,$3,$4,'requested') returning *",[no,u.id,amount,destination])).rows[0];await client.query('update wallets set available_cup=available_cup-$1,pending_cup=pending_cup+$1 where user_id=$2',[amount,u.id]);await client.query('commit');await audit(u.telegram_user_id,'withdrawal_requested','withdrawal',no,{amount_cup:amount});const text=`Maison Aurea - Retiro\nNúmero de retiro: ${no}\nUsuario: @${u.username||'sin_usuario'}\nID de Telegram: ${u.telegram_user_id}\nMonto: ${amount} CUP\nDestino: ${destination}`;await notifyWithdrawal(r,u);return send(res,201,{request_no:no,status:r.status,whatsapp_url:wa(text)});}catch(e){try{await client.query('rollback')}catch{};throw e}finally{client.release();}}
-  if(req.method==='POST'&&p==='/api/cards/enter'){const now=new Date(),hp=havanaParts(now),h=Number(hp.hour);if(!((h>=8&&h<12)||(h>=14&&h<22)))return send(res,400,{error:'Cartas disponibles de 08:00–12:00 y 14:00–22:00, hora de La Habana.'});const drawKey=`${hp.year}-${hp.month}-${hp.day}-${h<12?'AM':'PM'}`,client=await pool.connect();try{await client.query('begin');const w=(await client.query('select * from wallets where user_id=$1 for update',[u.id])).rows[0],spend=Number(w.purchased_diamonds)+Number(w.promotional_diamonds)-Number(w.locked_diamonds);if(spend<100){await client.query('rollback');return send(res,400,{error:'Necesitas 100 diamantes.'});}const exists=await client.query('select id from card_entries where user_id=$1 and draw_key=$2',[u.id,drawKey]);if(exists.rowCount){await client.query('rollback');return send(res,409,{error:'Ya participaste en este horario.'});}let promo=Math.min(Number(w.promotional_diamonds),100),purchased=100-promo;await client.query('update wallets set promotional_diamonds=promotional_diamonds-$1,purchased_diamonds=purchased_diamonds-$2 where user_id=$3',[promo,purchased,u.id]);const cards=['AUREA','ONYX','RUBÍ','ZAFIRO','ESMERALDA','PERLA'],selected=cards[crypto.randomInt(cards.length)];await client.query('insert into card_entries(user_id,draw_key,card) values($1,$2,$3)',[u.id,drawKey,selected]);await client.query('commit');return send(res,201,{ok:true,card:selected,draw_key:drawKey});}catch(e){try{await client.query('rollback')}catch{};throw e}finally{client.release();}}
-  return send(res,404,{error:'Ruta no encontrada.'});
+  if(update?.message){
+    const m=update.message;
+    if(m.web_app_data) return;
+    if(m.text?.startsWith('/start')) { await ensureUser(m.from,m.text.split(/\s+/)[1]||''); await sendFreshMenu(m.chat.id); }
+    else if(m.text) await sendFreshMenu(m.chat.id);
+  }
 }
-async function boot(){if(!pool)console.warn('DATABASE_URL no configurada');else await db(SCHEMA);const server=http.createServer(async(req,res)=>{try{await api(req,res)}catch(e){console.error(e);send(res,500,{error:'Error interno del servidor.'});}});server.listen(PORT,async()=>{console.log(`Maison Aurea listening on ${PORT}`);if(BOT_TOKEN)try{const payload={url:`${APP_URL}/webhook`};if(WEBHOOK_SECRET)payload.secret_token=WEBHOOK_SECRET;await telegram('setWebhook',payload);console.log('Telegram webhook configured');}catch(e){console.error('setWebhook:',e.message);}});}
-boot().catch(e=>{console.error('BOOT FAILED',e);process.exit(1);});
+
+async function start(){
+  if(pool) await db(SCHEMA).catch(e=>console.error('schema:',e.message));
+  const server=http.createServer(async(req,res)=>{
+    try{
+      const u=new URL(req.url,`http://${req.headers.host||'localhost'}`);
+      if(req.method==='GET' && u.pathname==='/health') return send(res,200,{ok:true,service:'maison-aurea'});
+      if(req.method==='GET' && u.pathname==='/api/catalog') return send(res,200,{ok:true,catalog:CATALOG,starter:STARTER});
+      if(req.method==='POST' && u.pathname==='/telegram/webhook') { if(WEBHOOK_SECRET && req.headers['x-telegram-bot-api-secret-token']!==WEBHOOK_SECRET) return send(res,403,{error:'forbidden'}); await handleUpdate(await readBody(req)); return send(res,200,{ok:true}); }
+      if(req.method==='GET' && (u.pathname==='/app' || u.pathname==='/')) { const html=await fs.readFile(new URL('./public/index.html',import.meta.url),'utf8'); return send(res,200,html,'text/html'); }
+      if(req.method==='GET' && u.pathname==='/api/payment-info') return send(res,200,{ok:true,info:paymentInstructions()});
+      if(req.method==='POST' && u.pathname==='/api/order'){
+        const user=await auth(req); if(!user) return send(res,401,{error:'unauthorized'}); const b=await readBody(req); const p=product(b.kind,b.catalog_id); if(!p) return send(res,400,{error:'invalid_product'});
+        const amount=b.kind==='mining'?p.price_cup:0, diamonds=b.kind==='mining'?p.diamonds:p.price_diamonds; const order={order_no:makeId('ORD'),user_id:user.id,kind:b.kind,catalog_id:b.catalog_id,amount_cup:amount,diamonds,snapshot:p};
+        const r=await db(`insert into orders(order_no,user_id,kind,catalog_id,amount_cup,diamonds,snapshot) values($1,$2,$3,$4,$5,$6,$7) returning *`,[order.order_no,order.user_id,order.kind,order.catalog_id,order.amount_cup,order.diamonds,JSON.stringify(order.snapshot)]); const o=r.rows[0];
+        await notifyOrder(o,user);
+        const label=p.name; const msg=`Maison Aurea — Pago\nOrden: ${o.order_no}\nUsuario: @${user.username||'sin_usuario'}\nID Telegram: ${user.telegram_user_id}\nProducto: ${label}\nMonto: ${amount} CUP\nDiamantes: ${diamonds}\n\n${paymentInstructions()}\n\nEnvía comprobante/captura del pago, tu número de teléfono y el número de operación. Espera 30–60 min. No envíes PIN, contraseña, CVV ni códigos SMS.`;
+        return send(res,201,{ok:true,order:o,whatsapp:wa(msg)});
+      }
+      if(req.method==='GET' && u.pathname==='/api/me'){ const user=await auth(req); if(!user) return send(res,401,{error:'unauthorized'}); await finalizeMining(user.id); const w=(await db('select * from wallets where user_id=$1',[user.id])).rows[0]; return send(res,200,{ok:true,user,wallet:w,starter:STARTER}); }
+      if(req.method==='POST' && u.pathname==='/api/mining/start'){ const user=await auth(req); if(!user) return send(res,401,{error:'unauthorized'}); const a=await db(`select 1 from mining_sessions where user_id=$1 and status='running'`,[user.id]); if(a.rowCount) return send(res,409,{error:'mining_already_active'}); const urow=(await db('select * from users where id=$1',[user.id])).rows[0]; if(urow.starter_mining_used) return send(res,409,{error:'starter_already_used'}); const end=new Date(Date.now()+30*60*1000); await db(`insert into mining_sessions(user_id,package_id,started_at,ends_at,status) values($1,'starter',now(),$2,'running')`,[user.id,end]); await db('update users set starter_mining_used=true where id=$1',[user.id]); return send(res,200,{ok:true,ends_at:end.toISOString(),duration_minutes:30,reward_cup:25}); }
+      if(req.method==='POST' && u.pathname==='/api/withdraw'){ const user=await auth(req); if(!user) return send(res,401,{error:'unauthorized'}); const b=await readBody(req); const amount=Number(b.amount); const destination=String(b.destination||'').trim(); if(!Number.isInteger(amount)||amount<=0||!destination) return send(res,400,{error:'invalid_withdrawal'}); const client=await pool.connect(); try{await client.query('begin'); const w=(await client.query('select * from wallets where user_id=$1 for update',[user.id])).rows[0]; if(!w||Number(w.available_cup)-Number(w.pending_cup)<amount){await client.query('rollback');return send(res,400,{error:'insufficient_balance'});} const no=makeId('RET'); const r=await client.query(`insert into withdrawals(request_no,user_id,amount_cup,destination) values($1,$2,$3,$4) returning *`,[no,user.id,amount,destination]); await client.query('update wallets set pending_cup=pending_cup+$1,available_cup=available_cup-$1 where user_id=$2',[amount,user.id]); await client.query('commit'); const wrow=r.rows[0]; await notifyWithdrawal(wrow,user); const msg=`Maison Aurea — Retiro\nNúmero: ${no}\nUsuario: @${user.username||'sin_usuario'}\nID Telegram: ${user.telegram_user_id}\nMonto: ${amount} CUP\nDestino: ${destination}\n\nSolicitud enviada. Espera 30–60 min.`; return send(res,201,{ok:true,withdrawal:wrow,whatsapp:wa(msg)});}catch(e){try{await client.query('rollback')}catch{};throw e}finally{client.release()}}
+      if(req.method==='GET' && u.pathname==='/api/admin'){ const user=await auth(req); if(!user||String(user.telegram_user_id)!==CREATOR_ID) return send(res,403,{error:'forbidden'}); return send(res,200,{ok:true,users:(await db('select count(*) from users')).rows[0].count,pending_orders:(await db(`select count(*) from orders where status in ('pending_payment','under_review')`)).rows[0].count,pending_withdrawals:(await db(`select count(*) from withdrawals where status='requested'`)).rows[0].count}); }
+      if(req.method==='GET' && u.pathname.startsWith('/api/')) return send(res,404,{error:'not_found'});
+      return send(res,404,{error:'not_found'});
+    }catch(e){ console.error(e); return send(res,500,{error:'server_error'}); }
+  });
+  server.listen(PORT,()=>console.log(`Maison Aurea listening on ${PORT}`));
+  if(BOT_TOKEN){ try{ await telegram('setWebhook',{url:`${APP_URL}/telegram/webhook`,secret_token:WEBHOOK_SECRET||undefined}); console.log('Telegram webhook configured'); }catch(e){console.error('webhook:',e.message)} }
+}
+start().catch(e=>{console.error(e);process.exit(1)});
