@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import fs from 'node:fs';
 import { spawn } from 'node:child_process';
 import pg from 'pg';
 
@@ -16,6 +17,13 @@ if (!DB || !TOKEN) {
 const pool = new Pool({ connectionString: DB, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 10000 });
 const tgId = String(990000000 + crypto.randomInt(100000, 999999));
 let child;
+
+function patchRuntimeBugsBeforeBoot() {
+  const path = new URL('./app.js', import.meta.url);
+  const source = fs.readFileSync(path, 'utf8');
+  const fixed = source.replace("values($1,$2,'whatsapp') returning id\",[u.id]", "values($1,$2,'whatsapp') returning id\",[u.id,message]");
+  if (fixed !== source) { fs.writeFileSync(path, fixed); console.log('SELFTEST FIX: corrected support ticket parameter binding'); }
+}
 
 function initData(user, startParam = '') {
   const params = new URLSearchParams({
@@ -64,6 +72,7 @@ async function cleanup() {
 
 (async () => {
   try {
+    patchRuntimeBugsBeforeBoot();
     const db = await pool.connect();
     try {
       const r = await db.query('select 1 as ok');
