@@ -1,5 +1,4 @@
 import crypto from 'node:crypto';
-import fs from 'node:fs';
 import { spawn } from 'node:child_process';
 import pg from 'pg';
 
@@ -15,17 +14,6 @@ if (!DB || !TOKEN) {
 }
 
 const pool = new Pool({ connectionString: DB, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 10000 });
-
-function patchRuntimeBeforeBoot() {
-  const path = new URL('./app.js', import.meta.url);
-  const source = fs.readFileSync(path, 'utf8');
-  const fixed = source.replace(/\.join\('\\\n'\)/, ".join('\\n')");
-  if (fixed !== source) {
-    fs.writeFileSync(path, fixed);
-    console.log('SELFTEST FIX: normalized initData data-check-string separator to literal\\n');
-  }
-}
-
 const tgId = String(990000000 + crypto.randomInt(100000, 999999));
 let child;
 
@@ -36,7 +24,7 @@ function initData(user, startParam = '') {
     auth_date: String(Math.floor(Date.now() / 1000)),
     start_param: startParam,
   });
-  const data = [...params.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>`${k}=${v}`).join('\\n');
+  const data = [...params.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>`${k}=${v}`).join('\n');
   const secret = crypto.createHmac('sha256', 'WebAppData').update(TOKEN).digest();
   const hash = crypto.createHmac('sha256', secret).update(data).digest('hex');
   params.set('hash', hash);
@@ -76,7 +64,6 @@ async function cleanup() {
 
 (async () => {
   try {
-    patchRuntimeBeforeBoot();
     const db = await pool.connect();
     try {
       const r = await db.query('select 1 as ok');
