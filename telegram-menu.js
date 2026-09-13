@@ -9,7 +9,7 @@ async function call(method,payload){
   return j.result;
 }
 try{
-  await call('setChatMenuButton',{menu_button:{type:'web_app',text:'Maison Aurea',web_app:{url:`${APP_URL}/app?screen=mining&v=20260913.1`}}});
+  await call('setChatMenuButton',{menu_button:{type:'web_app',text:'Maison Aurea',web_app:{url:`${APP_URL}/app?screen=home&v=20260913.2`}}});
   console.log('TELEGRAM MENU: WEB APP BUTTON CONFIGURED');
   const webhookPayload={url:`${APP_URL}/telegram/webhook`};
   if(SECRET) webhookPayload.secret_token=SECRET;
