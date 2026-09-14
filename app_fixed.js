@@ -14,8 +14,8 @@ const WA=String(process.env.WHATSAPP_NUMBER||'5355720394').replace(/\D/g,'');
 const EMAIL=process.env.SUPPORT_EMAIL||'nunezyenis05@gmail.com';
 const PAYMENT_INFO=String(process.env.PAYMENT_INFO||'Solicita las instrucciones de pago por WhatsApp.').trim();
 const WEBHOOK_SECRET=process.env.TELEGRAM_WEBHOOK_SECRET||'';
-const APP_VERSION='20260914.44';
-const RELEASE='20260914-cards-hours-v6';
+const APP_VERSION='20260914.45';
+const RELEASE='20260914-cards-hours-v7';
 let resetPromoResult='pending';
 let starterResetResult='pending';
 const pool=process.env.DATABASE_URL?new Pool({connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:false},max:5}):null;
@@ -26,7 +26,7 @@ const json=(res,status,data)=>{res.statusCode=status;res.setHeader('content-type
 const body=async req=>{let s='';for await(const c of req){s+=c;if(s.length>65536)throw Error('body_too_large')}try{return s?JSON.parse(s):{}}catch{throw Error('invalid_json')}};
 const id=(p)=>`${p}-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 const wa=(text)=>`https://wa.me/${WA}?text=${encodeURIComponent(text)}`;
-const appUrl=(screen='mining')=>`${APP_URL}/app?screen=${encodeURIComponent(screen)}&v=20260914.44`;
+const appUrl=(screen='mining')=>`${APP_URL}/app?screen=${encodeURIComponent(screen)}&v=20260914.45`;
 async function loadCatalogOverrides(){await db(`create table if not exists catalog_overrides(kind text not null,catalog_id text not null,patch jsonb not null default '{}'::jsonb,updated_at timestamptz not null default now(),primary key(kind,catalog_id))`);const rows=(await db(`select kind,catalog_id,patch from catalog_overrides`)).rows;for(const r of rows){const list=r.kind==="membership"?CATALOG.memberships:r.kind==="accelerator"?CATALOG.accelerators:r.kind==="referral"?[CATALOG.referral]:CATALOG.mining_packages;const item=list.find(x=>x.id===r.catalog_id);if(item&&r.patch)Object.assign(item,r.patch)}}
 
 const CARD_SET=['LUNARA','AURELIA','BRUMAL','ZAFIRA','VERDANIA','OBSIDIA'];
