@@ -9,7 +9,7 @@ async function call(method,payload){
   if(!j.ok) throw new Error(`${method}: ${j.description||'telegram_error'}`);
   return j.result;
 }
-const app=(screen)=>`${APP_URL}/app?screen=${encodeURIComponent(screen)}&v=20260914.40`;
+const app=(screen)=>`${APP_URL}/app?screen=${encodeURIComponent(screen)}&v=20260914.42`;
 const rows=[
   [{text:'⛏️ Minar',web_app:{url:app('mining')}},{text:'🃏 Carta jugadora del día',web_app:{url:app('cards')}}],
   [{text:'👛 Billetera',web_app:{url:app('wallet')}},{text:'🆘 Soporte',web_app:{url:app('support')}}],
