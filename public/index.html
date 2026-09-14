@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080916">
-<title>Maison Aurea · Mina · v33</title>
+<title>Maison Aurea · Mina · v34</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{--bg:#080916;--bg2:#10142b;--panel:rgba(22,25,52,.82);--panel2:#191d3b;--line:rgba(157,175,255,.16);--text:#f7f8ff;--muted:#9ca7ce;--gold:#ffd66f;--gold2:#ffad45;--cyan:#67e9ff;--blue:#718cff;--green:#76e7aa;--red:#ff7e9a;--shadow:0 18px 50px rgba(0,0,0,.32)}
@@ -69,8 +69,9 @@ main,.page{width:100%;max-width:100%}
 /* Telegram Android/WebView: keep the primary navigation visible above the system bar. */
 html,body{padding-bottom:0!important}body{overflow-x:hidden!important}.bottom-nav{position:fixed!important;z-index:9999!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;transform:none!important;width:100%!important;min-height:64px!important;display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;background:#0b0d20!important;border-top:1px solid rgba(158,177,255,.42)!important;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px))!important}.app{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}.toast{bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}</style>
 <style>
-/* High contrast for action boxes and light cards. */
-.product .btn,.card .btn,.btn.primary{color:#000!important;text-shadow:none!important;opacity:1!important}.product .btn{background:#fff!important;border-color:#fff!important}.product .btn:disabled{color:#111!important;background:#d9dbe2!important;border-color:#d9dbe2!important}.product .product-copy strong{color:#fff!important}.product .product-copy span{color:#d9e0f5!important}</style>
+/* Final Telegram contrast pass. */
+.quick,.drawer-btn{background:#fff!important;color:#000!important;border-color:#fff!important;text-shadow:none!important}.quick span,.drawer-btn span{color:#000!important}.bottom-nav{position:fixed!important;z-index:99999!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;transform:none!important;width:100%!important;display:grid!important;visibility:visible!important;opacity:1!important;background:#0b0d20!important;border-top:1px solid rgba(158,177,255,.55)!important}.bottom-nav .nav-btn{color:#e8edff!important;background:transparent!important}.bottom-nav .nav-btn.active{color:#ffd66f!important;background:rgba(255,214,111,.14)!important}.product .btn,.card .btn,.btn.primary{color:#000!important;text-shadow:none!important}.product .btn{background:#fff!important;border-color:#fff!important}</style>
+<script>window.addEventListener('DOMContentLoaded',()=>{const n=document.querySelector('.bottom-nav');if(n){n.style.setProperty('position','fixed','important');n.style.setProperty('display','grid','important');n.style.setProperty('visibility','visible','important');n.style.setProperty('opacity','1','important');n.style.setProperty('background','#0b0d20','important');n.querySelectorAll('.nav-btn').forEach(b=>b.style.setProperty('color','#e8edff','important'))}});</script>
 </head>
 <body>
 <div class="app">
