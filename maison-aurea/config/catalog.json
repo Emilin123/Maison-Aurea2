@@ -1,0 +1,390 @@
+{
+  "app_name": "Maison Aurea",
+  "currency": "CUP",
+  "timezone": "America/Havana",
+  "operating_hours": [
+    {
+      "start": "08:00",
+      "end": "12:00"
+    },
+    {
+      "start": "14:00",
+      "end": "22:00"
+    }
+  ],
+  "diamond_reference_value_cup": 5,
+  "reward_policy": {
+    "type": "promotional_capped_reward",
+    "guaranteed_return": false,
+    "diamonds_are_withdrawable": false,
+    "cup_rewards_require_available_fund": true,
+    "reference_values_are_not_promises": true,
+    "duplicate_credit_protection": true
+  },
+  "mining_packages": [
+    {
+      "id": "initial",
+      "name": "Inicial",
+      "price_cup": 500,
+      "diamonds": 100,
+      "duration_days": 3,
+      "reference_reward_diamonds": 120,
+      "reference_reward_cup": 600
+    },
+    {
+      "id": "basic",
+      "name": "Básico",
+      "price_cup": 2500,
+      "diamonds": 500,
+      "duration_days": 4,
+      "reference_reward_diamonds": 650,
+      "reference_reward_cup": 3250
+    },
+    {
+      "id": "large",
+      "name": "Grande",
+      "price_cup": 5000,
+      "diamonds": 1000,
+      "duration_days": 5,
+      "reference_reward_diamonds": 1350,
+      "reference_reward_cup": 6750
+    },
+    {
+      "id": "premium",
+      "name": "Premium",
+      "price_cup": 12500,
+      "diamonds": 2500,
+      "duration_days": 6,
+      "reference_reward_diamonds": 3500,
+      "reference_reward_cup": 17500
+    },
+    {
+      "id": "maximum",
+      "name": "Máximo",
+      "price_cup": 25000,
+      "diamonds": 5000,
+      "duration_days": 7,
+      "reference_reward_diamonds": 7500,
+      "reference_reward_cup": 37500
+    }
+  ],
+  "memberships": [
+    {
+      "id": "bronze",
+      "name": "Bronce",
+      "price_diamonds": 100,
+      "duration_days": 3,
+      "bonus_percent": 5
+    },
+    {
+      "id": "silver",
+      "name": "Plata",
+      "price_diamonds": 250,
+      "duration_days": 4,
+      "bonus_percent": 10
+    },
+    {
+      "id": "gold",
+      "name": "Oro",
+      "price_diamonds": 500,
+      "duration_days": 5,
+      "bonus_percent": 20
+    },
+    {
+      "id": "platinum",
+      "name": "Platino",
+      "price_diamonds": 1000,
+      "duration_days": 6,
+      "bonus_percent": 35
+    },
+    {
+      "id": "diamond",
+      "name": "Diamante",
+      "price_diamonds": 2500,
+      "duration_days": 7,
+      "bonus_percent": 50
+    }
+  ],
+  "accelerators": [
+    {
+      "id": "quartz",
+      "name": "Cuarzo",
+      "price_diamonds": 100,
+      "speed_multiplier": 2
+    },
+    {
+      "id": "ruby",
+      "name": "Rubí",
+      "price_diamonds": 150,
+      "speed_multiplier": 3
+    },
+    {
+      "id": "sapphire",
+      "name": "Zafiro",
+      "price_diamonds": 200,
+      "speed_multiplier": 4
+    },
+    {
+      "id": "supercluster",
+      "name": "Supercluster",
+      "price_diamonds": 250,
+      "speed_multiplier": 6
+    },
+    {
+      "id": "titan_reactor",
+      "name": "Reactor Titán",
+      "price_diamonds": 300,
+      "instant_complete": true
+    }
+  ],
+  "wallets": [
+    "purchased_diamonds",
+    "promotional_diamonds",
+    "locked_diamonds",
+    "pending_cup",
+    "available_cup",
+    "paid_cup"
+  ],
+  "order_states": [
+    "pending_payment",
+    "proof_uploaded",
+    "under_review",
+    "approved",
+    "rejected",
+    "cancelled"
+  ],
+  "mining_states": [
+    "created",
+    "running",
+    "accelerated",
+    "completed",
+    "reward_pending",
+    "reward_approved",
+    "cancelled"
+  ],
+  "withdrawal_states": [
+    "requested",
+    "balance_locked",
+    "under_review",
+    "paid",
+    "rejected",
+    "cancelled"
+  ],
+  "admin_approval_required": {
+    "diamond_purchases": true,
+    "memberships": true,
+    "accelerators": true,
+    "cup_rewards": true,
+    "withdrawals": true
+  },
+  "card_draws": {
+    "enabled": true,
+    "timezone": "America/Havana",
+    "entry_cost_diamonds": 100,
+    "draws_per_day": 2,
+    "winning_cards_per_draw": 1,
+    "total_winning_cards_per_day": 2,
+    "max_entries_per_draw": 500,
+    "configured_prize_cup": 1000,
+    "prize_is_subject_to_available_fund": true,
+    "schedule": [
+      {
+        "id": "morning",
+        "entry_window_start": "08:00",
+        "entry_window_end": "12:00",
+        "draw_time": "12:00"
+      },
+      {
+        "id": "evening",
+        "entry_window_start": "14:00",
+        "entry_window_end": "22:00",
+        "draw_time": "22:00"
+      }
+    ],
+    "entry_states": [
+      "open",
+      "paid",
+      "confirmed",
+      "drawn",
+      "winner",
+      "not_winner",
+      "refunded"
+    ],
+    "selection": {
+      "method": "server_secure_random_selection",
+      "published_rules_required": true,
+      "audit_log_required": true,
+      "hidden_participant_limit": false,
+      "dynamic_winner_count": true,
+      "conceal_material_draw_facts": false,
+      "drawn_card_is_selected_from_published_card_set": true
+    },
+    "legal_review_required_before_real_money_operation": true,
+    "winner_count_rule": {
+      "formula": "0 if valid_confirmed_entries < 2 else min(number_of_matching_entries, min(10, ceil(valid_confirmed_entries / 50)))",
+      "minimum_winners": 0,
+      "maximum_winners_per_draw": 10,
+      "zero_winner_allowed": true,
+      "published_to_players": true,
+      "unclaimed_prize_rule": "must_be_published_before_entries_open",
+      "examples": [
+        {
+          "valid_entries": "1",
+          "maximum_winners": 0
+        },
+        {
+          "valid_entries": "2-50",
+          "maximum_winners": 1
+        },
+        {
+          "valid_entries": "51-100",
+          "maximum_winners": 2
+        },
+        {
+          "valid_entries": "101-150",
+          "maximum_winners": 3
+        },
+        {
+          "valid_entries": "251-300",
+          "maximum_winners": 6
+        },
+        {
+          "valid_entries": "451-500",
+          "maximum_winners": 10
+        }
+      ]
+    },
+    "user_visibility": {
+      "show_participant_count": true,
+      "show_winner_count": true,
+      "show_winner_identities": false,
+      "show_winning_card": true,
+      "show_draw_id_and_timestamp": true,
+      "admin_can_view_full_entries": true,
+      "winners_receive_private_notification": true
+    },
+    "winner_quota_rule": {
+      "formula": "0 if valid_confirmed_entries < 2 else min(10, ceil(valid_confirmed_entries / 50))",
+      "examples": [
+        {
+          "valid_entries": "1-50",
+          "maximum_winners": 1
+        },
+        {
+          "valid_entries": "51-100",
+          "maximum_winners": 2
+        },
+        {
+          "valid_entries": "101-150",
+          "maximum_winners": 3
+        },
+        {
+          "valid_entries": "251-300",
+          "maximum_winners": 6
+        },
+        {
+          "valid_entries": "451-500",
+          "maximum_winners": 10
+        }
+      ],
+      "published_to_players": true
+    },
+    "actual_winner_rule": "min(number_of_matching_entries, winner_quota)",
+    "zero_winner_allowed": true,
+    "prize_per_winner_cup": 1000,
+    "maximum_prize_per_draw_cup": 10000,
+    "maximum_prize_per_day_cup": 20000
+  },
+  "security": {
+    "authentication": {
+      "primary_identity": "validated_telegram_user_id",
+      "telegram_init_data_validation_required": true,
+      "phone_verification": "optional_explicit_contact_share_or_otp",
+      "phone_is_not_sole_authenticator": true
+    },
+    "roles": {
+      "player": "player",
+      "creator": "creator",
+      "creator_access": "server_side_allowlist_and_step_up_authentication",
+      "creator_telegram_user_id": "CONFIGURE_SECURELY_NOT_IN_CLIENT"
+    },
+    "separation": {
+      "same_bot": true,
+      "role_based_menus": true,
+      "admin_routes_server_checked": true,
+      "admin_panel_hidden_from_player_menu": true,
+      "admin_actions_audited": true
+    },
+    "one_account_controls": {
+      "one_account_per_telegram_user_id": true,
+      "unique_database_constraint_telegram_user_id": true,
+      "one_active_mining_session_per_account": true,
+      "welcome_bonus_once_per_account": true,
+      "withdrawal_cooldown": true,
+      "duplicate_account_detection": "risk_signals_and_manual_review",
+      "no_absolute_multi_account_guarantee": true
+    },
+    "admin_security": {
+      "two_factor_or_passkey_required": true,
+      "reauthentication_for_approval_and_payout": true,
+      "no_credentials_in_chat": true,
+      "immutable_audit_log": true
+    }
+  },
+  "creator_settings": {
+    "draft_publish_workflow": {
+      "draft_changes": true,
+      "preview_before_publish": true,
+      "announce_before_effective_date": true,
+      "effective_at_required": true,
+      "audit_log_required": true,
+      "two_factor_for_publish": true,
+      "existing_orders_use_snapshot": true,
+      "existing_mining_sessions_use_snapshot": true,
+      "retroactive_changes_blocked": true
+    },
+    "editable_sections": [
+      "app_branding",
+      "catalog_prices",
+      "mining_durations_and_rates",
+      "membership_benefits",
+      "accelerators",
+      "card_draw_rules",
+      "operating_hours",
+      "withdrawal_rules",
+      "support_messages",
+      "user_notifications",
+      "maintenance_mode"
+    ],
+    "protected_sections": [
+      "creator_identity",
+      "audit_logs",
+      "historical_transactions",
+      "paid_withdrawals"
+    ]
+  },
+  "referrals": {
+    "enabled": true,
+    "levels": 1,
+    "reward_type": "diamonds",
+    "referrer_reward_diamonds": 50,
+    "reward_trigger": "referred_user_verified_and_first_order_approved",
+    "reward_is_withdrawable": false,
+    "self_referral_blocked": true,
+    "duplicate_device_and_payment_review": true,
+    "daily_reward_cap_per_user": 500,
+    "monthly_reward_cap_per_user": 5000,
+    "referral_states": [
+      "clicked",
+      "registered",
+      "verified",
+      "qualifying_order_pending",
+      "completed",
+      "rewarded",
+      "reversed"
+    ],
+    "public_rules_required": true,
+    "no_downline_or_multilevel_commissions": true
+  },
+  "brand_tagline": "Diamantes, minería virtual y cartas"
+}
