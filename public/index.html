@@ -64,8 +64,18 @@ main,.page{width:100%;max-width:100%}
 #cardList .product-copy strong{font-size:11px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #cardList .product-copy span{font-size:9px!important;white-space:nowrap}
 #cardList .product .btn{width:100%!important;min-height:28px!important;padding:4px 7px!important;font-size:10px!important}
-<style>button{-webkit-appearance:none!important;appearance:none!important}.quick,.drawer-btn{background:#171a36!important;color:#111!important;border:1px solid rgba(157,175,255,.28)!important;opacity:1!important}.bottom-nav{background:#0b0d20!important}.bottom-nav .nav-btn{background:transparent!important;color:#d8def7!important;border:0!important;opacity:1!important}/* Maison Aurea — Hamster-inspired premium fantasy skin. Visual layer only. */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700;900&display=swap');
+<style>button{-webkit-appearance:none!important;appearance:none!important}.quick,.drawer-btn{background:#171a36!important;color:#111!important;border:1px solid rgba(157,175,255,.28)!important;opacity:1!important}.bottom-nav{background:#0b0d20!important}.bottom-nav .nav-btn{background:transparent!important;color:#d8def7!important;border:0!important;opacity:1!important}</style>
+<style>
+/* Telegram Android/WebView: keep the primary navigation visible above the system bar. */
+html,body{padding-bottom:0!important}body{overflow-x:hidden!important}.bottom-nav{position:fixed!important;z-index:9999!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;transform:none!important;width:100%!important;min-height:64px!important;display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;background:#0b0d20!important;border-top:1px solid rgba(158,177,255,.42)!important;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px))!important}.app{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}.toast{bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}</style>
+<style>
+/* Final Telegram contrast pass. */
+.quick,.drawer-btn{background:#fff!important;color:#000!important;border-color:#111!important;text-shadow:none!important}.quick span,.drawer-btn span{color:#000!important}.bottom-nav{position:fixed!important;z-index:99999!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;transform:none!important;width:100%!important;display:grid!important;visibility:visible!important;opacity:1!important;background:#0b0d20!important;border-top:1px solid rgba(158,177,255,.55)!important}.bottom-nav .nav-btn{color:#e8edff!important;background:transparent!important}.bottom-nav .nav-btn.active{color:#ffd66f!important;background:rgba(255,214,111,.14)!important}.product .btn,.card .btn,.btn.primary{color:#000!important;text-shadow:none!important}.product .btn{background:#fff!important;border-color:#111!important}</style>
+<script>window.addEventListener('DOMContentLoaded',()=>{const n=document.querySelector('.bottom-nav');if(n){n.style.setProperty('position','fixed','important');n.style.setProperty('display','grid','important');n.style.setProperty('visibility','visible','important');n.style.setProperty('opacity','1','important');n.style.setProperty('background','#0b0d20','important');n.querySelectorAll('.nav-btn').forEach(b=>b.style.setProperty('color','#e8edff','important'))}});</script>
+<style>
+/* Membership, store and accelerator rows: maximum contrast. */
+.product{background:#fff!important;border-color:#111!important}.product .product-copy strong,.product .product-copy span{color:#111!important;text-shadow:none!important}.product .product-copy span{font-weight:700!important}.product .btn{color:#000!important;background:#fff!important;border-color:#c9cdd8!important}.product .product-art{box-shadow:none!important}</style>
+<style id="hamster-aurea-theme">/* Maison Aurea — Hamster-inspired premium fantasy skin. Visual layer only. */
 :root{
  --bg:#03070a;--bg2:#07151a;--panel:rgba(7,17,20,.92);--panel2:rgba(9,25,29,.96);
  --line:rgba(210,164,69,.58);--text:#fff9e8;--muted:#b6c8c2;--gold:#f6d477;--gold2:#b66b24;
@@ -118,18 +128,7 @@ h3{font-family:Cinzel,Georgia,serif!important;font-size:16px!important;color:#f8
 #cardList .btn{width:100%!important;font-size:10px!important;padding:6px 4px!important;min-height:31px!important}
 .game-card{border-radius:5px!important;border:2px solid #b88635!important;box-shadow:0 0 0 2px #071217,0 0 0 3px rgba(40,231,235,.42),0 22px 55px rgba(0,0,0,.75)!important}.game-bottom{border-color:#e0b45e!important}.hud-badge{border-radius:3px!important;border-color:#e0b45e!important;background:rgba(2,12,15,.82)!important}.aurea-mine{box-shadow:inset 0 0 55px rgba(20,239,245,.16)}
 @media(max-width:380px){#cardList .card-art-wrap{height:124px!important;min-height:124px!important;max-height:124px!important}}
-
 </style>
-<style>
-/* Telegram Android/WebView: keep the primary navigation visible above the system bar. */
-html,body{padding-bottom:0!important}body{overflow-x:hidden!important}.bottom-nav{position:fixed!important;z-index:9999!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;transform:none!important;width:100%!important;min-height:64px!important;display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;background:#0b0d20!important;border-top:1px solid rgba(158,177,255,.42)!important;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px))!important}.app{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}.toast{bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}</style>
-<style>
-/* Final Telegram contrast pass. */
-.quick,.drawer-btn{background:#fff!important;color:#000!important;border-color:#111!important;text-shadow:none!important}.quick span,.drawer-btn span{color:#000!important}.bottom-nav{position:fixed!important;z-index:99999!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;transform:none!important;width:100%!important;display:grid!important;visibility:visible!important;opacity:1!important;background:#0b0d20!important;border-top:1px solid rgba(158,177,255,.55)!important}.bottom-nav .nav-btn{color:#e8edff!important;background:transparent!important}.bottom-nav .nav-btn.active{color:#ffd66f!important;background:rgba(255,214,111,.14)!important}.product .btn,.card .btn,.btn.primary{color:#000!important;text-shadow:none!important}.product .btn{background:#fff!important;border-color:#111!important}</style>
-<script>window.addEventListener('DOMContentLoaded',()=>{const n=document.querySelector('.bottom-nav');if(n){n.style.setProperty('position','fixed','important');n.style.setProperty('display','grid','important');n.style.setProperty('visibility','visible','important');n.style.setProperty('opacity','1','important');n.style.setProperty('background','#0b0d20','important');n.querySelectorAll('.nav-btn').forEach(b=>b.style.setProperty('color','#e8edff','important'))}});</script>
-<style>
-/* Membership, store and accelerator rows: maximum contrast. */
-.product{background:#fff!important;border-color:#111!important}.product .product-copy strong,.product .product-copy span{color:#111!important;text-shadow:none!important}.product .product-copy span{font-weight:700!important}.product .btn{color:#000!important;background:#fff!important;border-color:#c9cdd8!important}.product .product-art{box-shadow:none!important}</style>
 </head>
 <body>
 <div class="app">
