@@ -110,31 +110,36 @@
       "id": "quartz",
       "name": "Cuarzo",
       "price_diamonds": 100,
-      "speed_multiplier": 2
+      "speed_multiplier": 2,
+      "price_cup": 500
     },
     {
       "id": "ruby",
       "name": "Rubí",
       "price_diamonds": 150,
-      "speed_multiplier": 3
+      "speed_multiplier": 3,
+      "price_cup": 750
     },
     {
       "id": "sapphire",
       "name": "Zafiro",
       "price_diamonds": 200,
-      "speed_multiplier": 4
+      "speed_multiplier": 4,
+      "price_cup": 1000
     },
     {
       "id": "supercluster",
       "name": "Supercluster",
       "price_diamonds": 250,
-      "speed_multiplier": 6
+      "speed_multiplier": 6,
+      "price_cup": 1250
     },
     {
       "id": "titan_reactor",
       "name": "Reactor Titán",
       "price_diamonds": 300,
-      "instant_complete": true
+      "instant_complete": true,
+      "price_cup": 1500
     }
   ],
   "wallets": [
