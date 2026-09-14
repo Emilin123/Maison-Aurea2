@@ -64,7 +64,62 @@ main,.page{width:100%;max-width:100%}
 #cardList .product-copy strong{font-size:11px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #cardList .product-copy span{font-size:9px!important;white-space:nowrap}
 #cardList .product .btn{width:100%!important;min-height:28px!important;padding:4px 7px!important;font-size:10px!important}
-<style>button{-webkit-appearance:none!important;appearance:none!important}.quick,.drawer-btn{background:#171a36!important;color:#111!important;border:1px solid rgba(157,175,255,.28)!important;opacity:1!important}.bottom-nav{background:#0b0d20!important}.bottom-nav .nav-btn{background:transparent!important;color:#d8def7!important;border:0!important;opacity:1!important}</style>
+<style>button{-webkit-appearance:none!important;appearance:none!important}.quick,.drawer-btn{background:#171a36!important;color:#111!important;border:1px solid rgba(157,175,255,.28)!important;opacity:1!important}.bottom-nav{background:#0b0d20!important}.bottom-nav .nav-btn{background:transparent!important;color:#d8def7!important;border:0!important;opacity:1!important}/* Maison Aurea — Hamster-inspired premium fantasy skin. Visual layer only. */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700;900&display=swap');
+:root{
+ --bg:#03070a;--bg2:#07151a;--panel:rgba(7,17,20,.92);--panel2:rgba(9,25,29,.96);
+ --line:rgba(210,164,69,.58);--text:#fff9e8;--muted:#b6c8c2;--gold:#f6d477;--gold2:#b66b24;
+ --cyan:#33f4ff;--blue:#168dbe;--green:#7ef0be;--red:#ff829a;--shadow:0 18px 55px rgba(0,0,0,.72);
+}
+*{scrollbar-color:#23616b #04090c}
+html{background:#020507}
+body{font-family:Cinzel,Georgia,serif!important;letter-spacing:.08px;background:
+ radial-gradient(ellipse at 50% 0%,rgba(11,84,91,.5),transparent 31%),
+ radial-gradient(ellipse at 0% 55%,rgba(38,5,62,.25),transparent 31%),
+ radial-gradient(ellipse at 100% 68%,rgba(0,123,142,.2),transparent 28%),
+ linear-gradient(180deg,#020506 0%,#061217 48%,#020608 100%)!important}
+body:before,body:after{content:"";position:fixed;z-index:-1;pointer-events:none;inset:0}
+body:before{opacity:.22;background-image:radial-gradient(circle at 15% 20%,#30fbff 0 1px,transparent 2px),radial-gradient(circle at 82% 30%,#b275ff 0 1px,transparent 2px),radial-gradient(circle at 65% 77%,#fff2a0 0 1px,transparent 2px);background-size:110px 150px,170px 190px,220px 240px}
+body:after{inset:9px;border:1px solid rgba(199,149,58,.45);box-shadow:inset 0 0 0 5px rgba(0,0,0,.65),inset 0 0 30px rgba(0,227,241,.12)}
+.app{width:min(100%,560px)!important;padding:15px 14px calc(104px + env(safe-area-inset-bottom))!important}
+.topbar{padding:4px 4px 13px;margin-bottom:5px;border-bottom:1px solid rgba(213,166,74,.33)}
+.brand{gap:11px}.brand-mark{width:45px;height:45px;border-radius:50%;background:radial-gradient(circle at 35% 25%,#68ffff,#087e99 45%,#09151d 47%,#06080c 72%)!important;border:2px solid var(--gold)!important;box-shadow:0 0 0 2px #071117,0 0 18px rgba(30,239,255,.55)!important;font-size:22px}.brand strong{font-family:'Cinzel Decorative',Georgia,serif!important;font-size:16px;color:#fff4c8;text-shadow:0 2px 0 #513113,0 0 12px rgba(255,211,104,.25)}.eyebrow{color:#61f2f4!important;letter-spacing:2.6px!important;font-size:10px!important;text-shadow:0 0 8px rgba(34,229,239,.55)}
+.top-balance{padding:7px 11px!important;border-radius:5px!important;background:linear-gradient(135deg,#071317,#0a2630)!important;border:1px solid var(--gold)!important;box-shadow:inset 0 0 15px rgba(0,241,255,.13),0 0 10px rgba(0,0,0,.4)}
+.gem-icon{border-radius:3px!important;background:linear-gradient(145deg,#d7ffff,#16d9ed 43%,#075cbb)!important;border:1px solid #a4ffff;box-shadow:0 0 13px #21e9ff!important}
+h1,h2,h3{font-family:'Cinzel Decorative',Cinzel,Georgia,serif!important;color:#fff3c4!important;text-shadow:0 2px 0 #372313,0 0 14px rgba(247,202,103,.25)}h1{font-size:26px!important}h2{font-size:23px!important;letter-spacing:1px}
+h3{font-family:Cinzel,Georgia,serif!important;font-size:16px!important;color:#f8e7af!important}
+.muted{color:#b9cbc6!important}.status{color:#72e9eb!important}
+.hero,.card,.profile,.product,.stat,.quick,.drawer-btn,.wallet-total,.game-bottom,.modal{position:relative;border-radius:4px!important;background:linear-gradient(145deg,rgba(12,28,31,.97),rgba(4,11,14,.97))!important;border:1px solid var(--line)!important;box-shadow:inset 0 0 0 1px rgba(20,230,239,.12),inset 0 0 23px rgba(0,176,198,.08),var(--shadow)!important}
+.hero:after,.card:after,.profile:after,.product:after,.stat:after,.quick:after,.drawer-btn:after,.wallet-total:after,.game-bottom:after,.modal:after{content:"";position:absolute;inset:4px;pointer-events:none;border:1px solid rgba(67,236,237,.18)}
+.hero{padding:21px 18px!important;background:radial-gradient(circle at 83% 18%,rgba(0,222,237,.3),transparent 25%),linear-gradient(135deg,#071d24,#090711 75%)!important}
+.hero:before{background:radial-gradient(circle,rgba(25,245,255,.34),transparent 68%)!important}
+.hero-copy{color:#c1d8d0!important}.mini-gem-art span{filter:drop-shadow(0 0 18px #24f5ff)!important}
+.btn{border-radius:4px!important;text-transform:uppercase;letter-spacing:.5px;background:linear-gradient(135deg,#0b343d,#07151b)!important;border:1px solid #c6933e!important;color:#fff4cb!important;box-shadow:inset 0 0 10px rgba(35,239,245,.16),0 4px 13px rgba(0,0,0,.4)!important}.btn.primary{background:linear-gradient(180deg,#ffe48b,#e7a93f 48%,#8d4c1d)!important;color:#160e08!important;border-color:#ffe8a3!important;text-shadow:0 1px #ffe6a7;box-shadow:0 0 0 1px #563313,0 0 18px rgba(255,196,64,.27)!important}.btn.ghost{background:linear-gradient(135deg,#102c32,#071318)!important}.btn.small{min-height:34px!important}
+.section-head{border-bottom:1px solid rgba(210,164,69,.45);padding-bottom:8px}.section-head h2,.section-head h3{font-family:'Cinzel Decorative',Georgia,serif!important}.link{color:var(--cyan)!important;text-shadow:0 0 7px rgba(39,235,243,.65)}
+.stats{gap:7px!important}.stat{padding:12px 9px!important;text-align:center}.stat .stat-label{color:#9fc1bd!important;text-transform:uppercase;letter-spacing:.4px}.stat strong{font-family:Cinzel,Georgia,serif!important;color:#fff!important;text-shadow:0 0 8px rgba(255,216,119,.45)}.stat strong.gold{color:#ffe084!important}.stat strong.cyan{color:#63faff!important}.stat strong.green{color:#8affce!important}
+.quick{padding:13px 4px!important}.quick span{filter:drop-shadow(0 0 7px #2bedf3)}
+.product{padding:12px!important;background:linear-gradient(135deg,rgba(15,38,42,.98),rgba(7,13,17,.98))!important}.product-art{border-radius:3px!important;border:1px solid #d5aa51!important;box-shadow:0 0 0 2px #061116,0 0 13px rgba(36,235,242,.27)!important}.product-copy strong{color:#fff0ba!important}.product-copy span{color:#b8ceca!important}
+.tabs{padding:4px 0 10px;border-bottom:1px solid rgba(210,164,69,.34)}.tab{border-radius:3px!important;background:#08171c!important;border-color:#98682c!important;color:#b5ccc5!important}.tab.active{background:linear-gradient(135deg,#1f9ca4,#0b485b)!important;color:#fff4bd!important;border-color:#ffe092!important;box-shadow:0 0 13px rgba(38,231,239,.28)}
+.wallet-total{background:radial-gradient(circle at 83% 30%,rgba(0,238,244,.33),transparent 27%),linear-gradient(135deg,#0a3940,#081015)!important}.wallet-total strong{color:#fff1a8!important;text-shadow:0 0 13px rgba(255,215,104,.75)}.balance{border-radius:3px!important;background:rgba(3,13,16,.84)!important;border:1px solid rgba(208,162,65,.45)!important}.balance span{color:#a9c8c1!important}.balance b{color:#f8e5a1!important}
+.field{border-radius:3px!important;background:#03090c!important;border-color:#8d672f!important;color:#fff9e9!important}.field:focus{border-color:#2ef6ff!important;box-shadow:0 0 0 3px rgba(40,235,243,.16)!important}.notice{border-radius:3px!important;background:rgba(17,117,125,.22)!important;border-color:#2cdde2!important;color:#cafff6!important}
+.drawer-grid{gap:8px!important}.drawer-btn{padding:15px 11px!important;color:#f7e8ae!important}.drawer-btn span{filter:drop-shadow(0 0 8px #23e9f1)}
+.rule{border-bottom-color:rgba(205,159,64,.35)!important}.rule b{color:#53f8ff!important;text-shadow:0 0 8px #00b9c5}
+.bottom-nav{width:min(100%,560px)!important;padding:7px 9px calc(7px + env(safe-area-inset-bottom))!important;background:linear-gradient(180deg,rgba(4,14,17,.98),rgba(1,6,8,.99))!important;border-top:1px solid #c79840!important;box-shadow:0 -4px 25px rgba(0,0,0,.7),inset 0 1px 0 rgba(43,244,243,.25)!important}.nav-btn{border-radius:3px!important;color:#81aaa9!important}.nav-btn span{filter:drop-shadow(0 0 5px rgba(44,238,243,.7))}.nav-btn.active{color:#ffe18a!important;background:linear-gradient(180deg,rgba(20,142,150,.45),rgba(10,54,63,.3))!important;border:1px solid rgba(245,203,112,.65)!important;box-shadow:0 0 11px rgba(35,229,237,.2)}
+.back{font-family:Cinzel,Georgia,serif!important}.modal-wrap{background:rgba(0,4,7,.82)!important}.modal{background:linear-gradient(145deg,#0c272d,#050a0d)!important}
+/* The card gallery gets the tall ornamental-card treatment while preserving all existing handlers. */
+#cardList{gap:14px!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;padding:3px!important}
+#cardList .product{padding:7px!important;gap:6px!important;background:linear-gradient(145deg,#081b20,#05090c)!important;border-color:#d2a34e!important;box-shadow:inset 0 0 0 2px #10161a,0 0 0 1px rgba(47,235,239,.45),0 10px 22px rgba(0,0,0,.55)!important}
+#cardList .product:before{content:"✦";position:absolute;z-index:2;top:2px;left:5px;color:#36faff;font-size:12px;text-shadow:0 0 8px #35faff}
+#cardList .card-art-wrap{height:145px!important;min-height:145px!important;max-height:145px!important;border:2px solid #b98736!important;box-shadow:inset 0 0 0 1px #33e8ed,0 0 13px rgba(32,235,239,.3)!important;background:#061014!important}
+#cardList .card-art{object-fit:cover!important;object-position:center!important}
+#cardList .product-copy{text-align:center!important;color:#fff4bd!important;width:100%!important}
+#cardList .product-copy strong{font-family:'Cinzel Decorative',Georgia,serif!important;font-size:12px!important;color:#fff1b2!important;text-shadow:0 1px #3e2412!important;letter-spacing:.5px}
+#cardList .product-copy span{font-family:Cinzel,Georgia,serif!important;color:#a9f7f0!important;font-size:10px!important}
+#cardList .btn{width:100%!important;font-size:10px!important;padding:6px 4px!important;min-height:31px!important}
+.game-card{border-radius:5px!important;border:2px solid #b88635!important;box-shadow:0 0 0 2px #071217,0 0 0 3px rgba(40,231,235,.42),0 22px 55px rgba(0,0,0,.75)!important}.game-bottom{border-color:#e0b45e!important}.hud-badge{border-radius:3px!important;border-color:#e0b45e!important;background:rgba(2,12,15,.82)!important}.aurea-mine{box-shadow:inset 0 0 55px rgba(20,239,245,.16)}
+@media(max-width:380px){#cardList .card-art-wrap{height:124px!important;min-height:124px!important;max-height:124px!important}}
+
+</style>
 <style>
 /* Telegram Android/WebView: keep the primary navigation visible above the system bar. */
 html,body{padding-bottom:0!important}body{overflow-x:hidden!important}.bottom-nav{position:fixed!important;z-index:9999!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;transform:none!important;width:100%!important;min-height:64px!important;display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;background:#0b0d20!important;border-top:1px solid rgba(158,177,255,.42)!important;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px))!important}.app{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}.toast{bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}</style>
