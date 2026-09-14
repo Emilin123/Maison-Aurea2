@@ -15,7 +15,7 @@ const rows=[
   [{text:'👛 Billetera',web_app:{url:app('wallet')}},{text:'🆘 Soporte',web_app:{url:app('support')}}],
   [{text:'💎 Tienda',web_app:{url:app('store')}},{text:'🤝 Referidos',web_app:{url:app('referrals')}}],
   [{text:'👑 Membresías',web_app:{url:app('members')}},{text:'⚡ Aceleradores',web_app:{url:app('accelerators')}}],
-  [{text:'📋 Reglas',web_app:{url:app('rules')}},{text:'⚙️ Ajustes',web_app:{url:app('settings')}}],
+  [{text:'📋 Reglas',web_app:{url:app('rules')}},{text:'⚙️ Ajustes',web_app:{url:app('settings')}}],[{text:'📖 Guía para jugar',web_app:{url:app('guide')}}],
   [{text:'🏠 Inicio',web_app:{url:app('home')}}]
 ];
 try{
