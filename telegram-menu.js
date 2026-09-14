@@ -9,7 +9,7 @@ async function call(method,payload){
   if(!j.ok) throw new Error(`${method}: ${j.description||'telegram_error'}`);
   return j.result;
 }
-const app=(screen)=>`${APP_URL}/app?screen=${encodeURIComponent(screen)}&v=20260913.30`;
+const app=(screen)=>`${APP_URL}/app?screen=${encodeURIComponent(screen)}&v=20260913.15`;
 const rows=[
   [{text:'⛏️ Minar',web_app:{url:app('mining')}},{text:'🃏 Carta jugadora del día',web_app:{url:app('cards')}}],
   [{text:'👛 Billetera',web_app:{url:app('wallet')}},{text:'🆘 Soporte',web_app:{url:app('support')}}],
@@ -24,6 +24,6 @@ try{
   if(SECRET) webhookPayload.secret_token=SECRET;
   await call('setWebhook',webhookPayload);
   await call('sendMessage',{chat_id:CREATOR_ID,text:'Maison Aurea · menú actualizado',reply_markup:{remove_keyboard:true}});
-  await call('sendMessage',{chat_id:CREATOR_ID,text:'Selecciona una sección:',reply_markup:{inline_keyboard:rows}});
+  await call('sendMessage',{chat_id:CREATOR_ID,text:'Selecciona una sección:',reply_markup:{keyboard:rows,resize_keyboard:true,is_persistent:true}});
   console.log('TELEGRAM MENU: HOME + FULL MENU CONFIGURED');
 }catch(e){console.error('TELEGRAM MENU/WEBHOOK CONFIG FAILED:',e.message)}
