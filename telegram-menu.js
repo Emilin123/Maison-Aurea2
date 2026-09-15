@@ -23,7 +23,5 @@ try{
   const webhookPayload={url:`${APP_URL}/telegram/webhook`,allowed_updates:['message','callback_query']};
   if(SECRET) webhookPayload.secret_token=SECRET;
   await call('setWebhook',webhookPayload);
-  await call('sendMessage',{chat_id:CREATOR_ID,text:'Maison Aurea · menú actualizado',reply_markup:{remove_keyboard:true}});
-  await call('sendMessage',{chat_id:CREATOR_ID,text:'Selecciona una sección:',reply_markup:{keyboard:rows,resize_keyboard:true,is_persistent:true}});
   console.log('TELEGRAM MENU: HOME + FULL MENU CONFIGURED');
 }catch(e){console.error('TELEGRAM MENU/WEBHOOK CONFIG FAILED:',e.message)}
