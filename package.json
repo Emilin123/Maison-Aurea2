@@ -1,0 +1,12 @@
+{
+  "name": "maison-aurea",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node telegram-menu.js && node app_boot.js",
+    "selftest": "node selftest.js"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  }
+}
