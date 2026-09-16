@@ -29,7 +29,10 @@
       "diamonds": 100,
       "duration_days": 3,
       "reference_reward_diamonds": 120,
-      "reference_reward_cup": 600
+      "reference_reward_cup": 600,
+      "price_usd": 5,
+      "reward_usd": 6,
+      "gross_profit_usd": 1
     },
     {
       "id": "basic",
@@ -38,7 +41,10 @@
       "diamonds": 500,
       "duration_days": 4,
       "reference_reward_diamonds": 650,
-      "reference_reward_cup": 3250
+      "reference_reward_cup": 3250,
+      "price_usd": 25,
+      "reward_usd": 32.5,
+      "gross_profit_usd": 7.5
     },
     {
       "id": "large",
@@ -47,7 +53,10 @@
       "diamonds": 1000,
       "duration_days": 5,
       "reference_reward_diamonds": 1350,
-      "reference_reward_cup": 6750
+      "reference_reward_cup": 6750,
+      "price_usd": 50,
+      "reward_usd": 67.5,
+      "gross_profit_usd": 17.5
     },
     {
       "id": "premium",
@@ -56,7 +65,10 @@
       "diamonds": 2500,
       "duration_days": 6,
       "reference_reward_diamonds": 3500,
-      "reference_reward_cup": 17500
+      "reference_reward_cup": 17500,
+      "price_usd": 125,
+      "reward_usd": 175,
+      "gross_profit_usd": 50
     },
     {
       "id": "maximum",
@@ -65,7 +77,10 @@
       "diamonds": 5000,
       "duration_days": 7,
       "reference_reward_diamonds": 7500,
-      "reference_reward_cup": 37500
+      "reference_reward_cup": 37500,
+      "price_usd": 250,
+      "reward_usd": 375,
+      "gross_profit_usd": 125
     }
   ],
   "memberships": [
@@ -74,35 +89,40 @@
       "name": "Bronce",
       "price_diamonds": 100,
       "duration_days": 3,
-      "bonus_percent": 5
+      "bonus_percent": 5,
+      "price_usd": 5
     },
     {
       "id": "silver",
       "name": "Plata",
       "price_diamonds": 250,
       "duration_days": 4,
-      "bonus_percent": 10
+      "bonus_percent": 10,
+      "price_usd": 12.5
     },
     {
       "id": "gold",
       "name": "Oro",
       "price_diamonds": 500,
       "duration_days": 5,
-      "bonus_percent": 20
+      "bonus_percent": 20,
+      "price_usd": 25
     },
     {
       "id": "platinum",
       "name": "Platino",
       "price_diamonds": 1000,
       "duration_days": 6,
-      "bonus_percent": 35
+      "bonus_percent": 35,
+      "price_usd": 50
     },
     {
       "id": "diamond",
       "name": "Diamante",
       "price_diamonds": 2500,
       "duration_days": 7,
-      "bonus_percent": 50
+      "bonus_percent": 50,
+      "price_usd": 125
     }
   ],
   "accelerators": [
@@ -111,35 +131,40 @@
       "name": "Cuarzo",
       "price_diamonds": 100,
       "speed_multiplier": 2,
-      "price_cup": 500
+      "price_cup": 500,
+      "price_usd": 5
     },
     {
       "id": "ruby",
       "name": "Rubí",
       "price_diamonds": 150,
       "speed_multiplier": 3,
-      "price_cup": 750
+      "price_cup": 750,
+      "price_usd": 7.5
     },
     {
       "id": "sapphire",
       "name": "Zafiro",
       "price_diamonds": 200,
       "speed_multiplier": 4,
-      "price_cup": 1000
+      "price_cup": 1000,
+      "price_usd": 10
     },
     {
       "id": "supercluster",
       "name": "Supercluster",
       "price_diamonds": 250,
       "speed_multiplier": 6,
-      "price_cup": 1250
+      "price_cup": 1250,
+      "price_usd": 12.5
     },
     {
       "id": "titan_reactor",
       "name": "Reactor Titán",
       "price_diamonds": 300,
       "instant_complete": true,
-      "price_cup": 1500
+      "price_cup": 1500,
+      "price_usd": 15
     }
   ],
   "wallets": [
@@ -391,5 +416,12 @@
     "public_rules_required": true,
     "no_downline_or_multilevel_commissions": true
   },
-  "brand_tagline": "Diamantes, minería virtual y cartas"
+  "brand_tagline": "Diamantes, minería virtual y cartas",
+  "international_catalog": {
+    "base_rate_usd_per_diamond": 0.05,
+    "quote_policy": "dynamic_estimate_only",
+    "crypto_quote_source": "CoinGecko API",
+    "editable_by": "creator_only",
+    "historical_data_immutable": true
+  }
 }
